@@ -20,6 +20,8 @@ type File struct {
 	content  []byte
 	ver      int64
 	c        chan struct{}
+
+	ignoreEvents map[fsnotify.Op]struct{}
 }
 
 type Option func(*File)
@@ -30,10 +32,19 @@ func WithLogger(log logger.LeveledLogger) Option {
 	}
 }
 
+func WithIgnoreEvents(ops []fsnotify.Op) Option {
+	return func(f *File) {
+		for _, op := range ops {
+			f.ignoreEvents[op] = struct{}{}
+		}
+	}
+}
+
 func NewFileSource(filename string, opts ...Option) (fs *File, err error) {
 	fs = &File{
-		filename: filename,
-		logger:   nooplogger.Default(),
+		filename:     filename,
+		logger:       nooplogger.Default(),
+		ignoreEvents: make(map[fsnotify.Op]struct{}),
 	}
 	for _, opt := range opts {
 		opt(fs)
