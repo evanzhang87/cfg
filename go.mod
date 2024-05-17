@@ -1,4 +1,4 @@
-module github.com/gokits/cfg
+module github.com/evanzhang87/cfg
 
 go 1.12
 
